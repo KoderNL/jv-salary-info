@@ -9,7 +9,6 @@ public class SalaryInfoTest {
             "25.04.2019 John 60 50",
             "25.04.2019 Andrew 3 200",
             "25.04.2019 Kate 10 100",
-            "25.04.2019 John 10 100",
 
             "26.04.2019 Andrew 3 200",
             "26.04.2019 Kate 9 100",

@@ -4,60 +4,62 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class SalaryInfo {
-    private static final int POSITION_OF_DATE = 0;
-    private static final int POSITION_OF_NAME = 1;
-    private static final int POSITION_OF_WORK_HOURS = 2;
-    private static final int POSITION_OF_HOUR_SALARY = 3;
-    private static final int ONE_DAY = 1;
-    private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private static final int DATE = 0;
+    private static final int NAME = 1;
+    private static final int HOURS = 2;
+    private static final int RATE = 3;
+    private static final int DAY = 1;
+    private static final int NULL = 0;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     public String getSalaryInfo(String[] names, String[] data, String dateFrom, String dateTo) {
         StringBuilder stringBuilder = new StringBuilder();
-        LocalDate dateFromLocalDate = LocalDate.parse(dateFrom,fmt).minusDays(ONE_DAY);
-        LocalDate dateToLocalDate = LocalDate.parse(dateTo,fmt).plusDays(ONE_DAY);
-        int nameIndex = 0;
-        int salaryAccumulator = 0;
-        int correctLinesOnDate = 0;
-        int counterOfWroteLines = 0;
+        LocalDate dateFromLocalDate = LocalDate.parse(dateFrom, FORMATTER).minusDays(DAY);
+        LocalDate dateToLocalDate = LocalDate.parse(dateTo, FORMATTER).plusDays(DAY);
+        int lastIndexOfDataLines = data.length - 1;
+        int lastIndexOfNames = names.length - 1;
+        int indexOfName = NULL;
+        int salary = NULL;
+        int linesToWrite = NULL;
+        int wroteLines = NULL;
 
-            stringBuilder.append("Report for period ").append(dateFrom)//25.04.2019
-                    .append(" - ").append(dateTo)
-                    .append(System.lineSeparator());
+        stringBuilder.append("Report for period ").append(dateFrom).append(" - ").append(dateTo)
+                .append(System.lineSeparator());
 
-            for (int i = 0; i < data.length; i++) {
-                String[] currentString = data[i].split(" ");
-                LocalDate currentStringData = LocalDate.parse(currentString[POSITION_OF_DATE], fmt);
-
-                if (currentStringData.isAfter(dateFromLocalDate) && currentStringData.isBefore(dateToLocalDate)) {//date on our range
-                    if (nameIndex == 0) {
-                        correctLinesOnDate++;
-                    }
-                    if (currentString[POSITION_OF_NAME].equals(names[nameIndex])) {//if employee from data equal our index employee for counter
-                        salaryAccumulator += Integer.parseInt(currentString[POSITION_OF_WORK_HOURS])
-                                * Integer.parseInt(currentString[POSITION_OF_HOUR_SALARY]);
-                        counterOfWroteLines++;
-                    }
+        for (int i = NULL; i < data.length; i++) {
+            String[] currentString = data[i].split(" ");
+            LocalDate dateOfCurrentString = LocalDate.parse(currentString[DATE], FORMATTER);
+            if (dateOfCurrentString.isAfter(dateFromLocalDate)
+                    && dateOfCurrentString.isBefore(dateToLocalDate)) {
+                if (indexOfName == NULL) {
+                    linesToWrite++;
                 }
-                if (i == data.length - 1 && correctLinesOnDate > counterOfWroteLines) {
-                    stringBuilder.append(names[nameIndex]).append(" - ").append(salaryAccumulator)
-                    .append(System.lineSeparator());//write our collect data for current name
-                    salaryAccumulator = 0;
-                    i = 0;
-                    nameIndex++;//change index to next name for checking if it present in current date
-                }
-                if (i == data.length - 1 && correctLinesOnDate == counterOfWroteLines
-                        && correctLinesOnDate != 0) {
-                    stringBuilder.append(names[nameIndex]).append(" - ").append(salaryAccumulator);
-                }
-                if (i == data.length - 1 && correctLinesOnDate == 0 && nameIndex < names.length) {//case if we dont have correct lines
-                    stringBuilder.append(names[nameIndex]).append(" - ").append(salaryAccumulator);
-                    if (nameIndex != names.length - 1) {
-                        stringBuilder.append(System.lineSeparator());
-                    }
-                    nameIndex++;
-                    i = 0;
+                if (currentString[NAME].equals(names[indexOfName])) {
+                    salary += Integer.parseInt(currentString[HOURS])
+                            * Integer.parseInt(currentString[RATE]);
+                    wroteLines++;
                 }
             }
+            if (i == lastIndexOfDataLines && linesToWrite > wroteLines) {
+                stringBuilder.append(names[indexOfName]).append(" - ").append(salary)
+                        .append(System.lineSeparator());
+                salary = NULL;
+                i = NULL;
+                indexOfName++;
+            }
+            if (i == lastIndexOfDataLines && linesToWrite == wroteLines
+                    && linesToWrite != NULL) {
+                stringBuilder.append(names[indexOfName]).append(" - ").append(salary);
+            }
+            if (i == lastIndexOfDataLines && linesToWrite == NULL && indexOfName < names.length) {
+                stringBuilder.append(names[indexOfName]).append(" - ").append(salary);
+                if (indexOfName != lastIndexOfNames) {
+                    stringBuilder.append(System.lineSeparator());
+                }
+                indexOfName++;
+                i = NULL;
+            }
+        }
         return stringBuilder.toString();
     }
 }
